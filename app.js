@@ -22,19 +22,6 @@ var campgroundsSchema = new mongoose.Schema({
 
 var Campground = mongoose.model("Campground", campgroundsSchema);
 
-// Campground.create({
-//     name: "Salmon Creek",
-//     image: "https://cdn.pixabay.com/photo/2016/11/29/04/17/bonfire-1867275__340.jpg"
-// }, (err, campground) => {
-//     if (err) {
-//         console.log(`Error: ${err}`);
-//     } else {
-//         console.log("We just save a campground to the DB");
-//         console.log(campground);
-//     }
-// });
-
-
 
 // ROUTES
 app.get("/", (req, res) => {
@@ -58,6 +45,7 @@ app.get("/campgrounds/new", (req, res) => {
 
 app.post("/campgrounds", (req, res) => {
     let newCampground = {name: req.body.name, image: req.body.image};
+    // create the new campground and save to the DB
     Campground.create(newCampground, (err, campground) => {
         if (err) {
             console.log(`Error: ${err}`);
