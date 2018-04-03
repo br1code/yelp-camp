@@ -1,7 +1,8 @@
 const express = require("express"),
     bodyParser = require("body-parser"),
     mongoose = require("mongoose"),
-    Campground = require("./models/campground.js");
+    Campground = require("./models/campground.js"),
+    seedDB = require("./seeds");
 
 const app = express();
 
@@ -13,6 +14,8 @@ app.use(express.static("public"));
 app.use(bodyParser.urlencoded({extended: true}));
 mongoose.connect("mongodb://localhost/yelp_camp");
 
+
+seedDB();
 
 // ROUTES ---------------------------------------------------------
 app.get("/", (req, res) => {
@@ -55,13 +58,15 @@ app.get("/campgrounds/new", (req, res) => {
 
 // SHOW - shows more info about one campground
 app.get("/campgrounds/:id", (req, res) => {
-    Campground.findById(req.params.id, (err, campground) => {
-        if (err) {
-            console.log(`Error: ${err}`);
-        } else {
-            res.render("show", {campground: campground});
-        }
-    });
+    Campground.findById(req.params.id).
+        populate("comments").
+        exec((err, campground) => {
+            if (err) {
+                console.log(`Error: ${err}`);
+            } else {
+                res.render("show", {campground: campground});
+            }
+        });
 });
 
 
