@@ -1,22 +1,61 @@
-const express = require("express"),
-    bodyParser = require("body-parser"),
-    mongoose = require("mongoose"),
-    Campground = require("./models/campground"),
-    Comment = require("./models/comment"),
-    seedDB = require("./seeds");
+const express               = require("express"),
+    bodyParser              = require("body-parser"),
+    mongoose                = require("mongoose"),
+    seedDB                  = require("./seeds"),
+    passport                = require("passport"),
+    LocalStrategy           = require("passport-local"),
+    passportLocalMongoose   = require("passport-local-mongoose"),
+    expressSession          = require("express-session"),
+    Campground              = require("./models/campground"),
+    Comment                 = require("./models/comment"),
+    User                    = require("./models/user");
 
 const app = express();
 
 const port = process.env.PORT || 3000;
 
+// CONFIG ---------------------------------------------------------
 
+// mongoose configuration
+mongoose.connect("mongodb://localhost/yelp_camp");
+
+// express configuration
 app.set("view engine", "ejs");
 app.use(express.static(__dirname + "/public"));
 app.use(bodyParser.urlencoded({extended: true}));
-mongoose.connect("mongodb://localhost/yelp_camp");
 
+
+// passport configuration
+let sessionConfig = {
+    secret: "the most encrypted secret in the world",
+    resave: false,
+    saveUninitialized: false
+};
+
+app.use(expressSession(sessionConfig));
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new LocalStrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
+// middleware to provide currentUser to all routes
+app.use((req, res, next) => {
+    res.locals.currentUser = req.user;
+    next();
+})
 
 seedDB();
+
+// CUSTOM MIDDLEWARE ----------------------------------------------
+
+// check if user is logged in
+function isLoggedIn(req, res, next) {
+    if (req.isAuthenticated()) {
+        return next();
+    }
+    res.redirect("/login");
+}
 
 // ROUTES ---------------------------------------------------------
 
@@ -31,7 +70,9 @@ app.get("/campgrounds", (req, res) => {
         if (err) {
             console.log(`Error: ${err}`);
         } else {
-            res.render("campgrounds/index", {campgrounds: campgrounds});
+            res.render("campgrounds/index", {
+                campgrounds: campgrounds,
+            });
         }
     });
 });
@@ -66,7 +107,9 @@ app.get("/campgrounds/:id", (req, res) => {
             if (err) {
                 console.log(`Error: ${err}`);
             } else {
-                res.render("campgrounds/show", {campground: campground});
+                res.render("campgrounds/show", {
+                    campground: campground
+                });
             }
         });
 });
@@ -74,7 +117,7 @@ app.get("/campgrounds/:id", (req, res) => {
 // COMMENTS ROUTES ------------------------------------------------
 
 // NEW - show form to create new comment
-app.get("/campgrounds/:id/comments/new", (req, res) => {
+app.get("/campgrounds/:id/comments/new", isLoggedIn, (req, res) => {
     Campground.findById(req.params.id, (err, campground) => {
         if (err) {
             console.log(`Error: ${err}`);
@@ -85,7 +128,7 @@ app.get("/campgrounds/:id/comments/new", (req, res) => {
 });
 
 // CREATE - add new comment to the db
-app.post("/campgrounds/:id/comments", (req, res) => {
+app.post("/campgrounds/:id/comments", isLoggedIn, (req, res) => {
     // Find the campground to add the comment
     Campground.findById(req.params.id, (err, campground) => {
         if (err) {
@@ -106,6 +149,45 @@ app.post("/campgrounds/:id/comments", (req, res) => {
         }
     });
 });
+
+// AUTH ROUTES ------------------------------------------------
+
+// signup
+app.get("/signup", (req, res) => {
+    res.render("users/signup");
+});
+
+app.post("/signup", (req, res) => {
+    let newUser = new User({username: req.body.username});
+    User.register(newUser, req.body.password, (err, user) => {
+        if (err) {
+            console.log(`Error: ${err}`);
+            return res.render("users/signup");
+        }
+        passport.authenticate("local")(req, res, () => {
+            res.redirect("/campgrounds");
+        });
+    });
+}); 
+
+// login
+app.get("/login", (req, res) => {
+    res.render("users/login");
+});
+
+app.post("/login", passport.authenticate("local", {
+    successRedirect: "/campgrounds",
+    failureRedirect: "/login"
+}), (req, res) => {
+    console.log("User logged in");
+});
+
+// logout
+app.get("/logout", (req, res) => {
+    req.logout();
+    res.redirect("/campgrounds");
+})
+
 // LISTEN ---------------------------------------------------------
 app.listen(port, () => {
     console.log(`Server listening at port ${port}`);
