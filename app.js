@@ -54,7 +54,7 @@ app.use("/campgrounds/:id/comments", commentRoutes);
 app.use("/campgrounds", campgroundRoutes);
 
 // Fill the DB with initial data
-seedDB();
+// seedDB();
 
 // LISTEN ---------------------------------------------------------
 app.listen(port, () => {

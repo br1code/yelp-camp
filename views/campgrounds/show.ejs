@@ -27,15 +27,19 @@
                         </a>
                     </div>
                     <hr>
-                    <% campground.comments.forEach(comment => { %>
-                        <div class="row">
-                            <div class="col-md-12">
-                                <strong><%= comment.author %></strong>
-                                <span class="pull-right">3 days ago</span>
-                                <p><%= comment.text %></p>
+                    <% if (!campground.comments.length) { %>
+                        <p class="text-center">No comments yet</p>
+                    <% } else { %>
+                        <% campground.comments.forEach(comment => { %>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <strong><%= comment.author.username %></strong>
+                                    <span class="pull-right"><%= comment.date %></span>
+                                    <p><%= comment.text %></p>
+                                </div>
                             </div>
-                        </div>
-                    <% }) %>
+                        <% }) %>
+                    <% } %>   
                 </div>
             </div>
         </div>

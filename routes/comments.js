@@ -1,4 +1,5 @@
 const express           = require("express"),
+    moment              = require("moment"),
     Campground          = require("../models/campground"),
     Comment             = require("../models/comment"),
     middleware          = require("../extras/middleware");
@@ -31,6 +32,12 @@ router.post("/", middleware.isLoggedIn, (req, res) => {
                 if (err) {
                     console.log(`Error: ${err}`);
                 } else {
+                    // add id and username to comment using req.user
+                    // from the custom middleware
+                    comment.author.id = req.user._id;
+                    comment.author.username = req.user.username;
+                    comment.date = moment().calendar();
+                    comment.save();
                     // Add new comment to the campground and save
                     campground.comments.push(comment);
                     campground.save();
