@@ -1,5 +1,6 @@
 const express           = require("express"),
-    Campground          = require("../models/campground");
+    Campground          = require("../models/campground"),
+    middleware          = require("../extras/middleware");
 
 const router = express.Router();
 
@@ -17,12 +18,21 @@ router.get("/", (req, res) => {
     });
 });
 
+// NEW - Show form to create new campground
+router.get("/new", middleware.isLoggedIn, (req, res) => {
+    res.render("campgrounds/new");
+});
+
 // CREATE - Add new campground to DB
-router.post("/", (req, res) => {
+router.post("/", middleware.isLoggedIn,(req, res) => {
     let newCampground = {
         name: req.body.campground.name,
         image: req.body.campground.image,
-        description: req.body.campground.description
+        description: req.body.campground.description,
+        author: {
+            id: req.user._id,
+            username: req.user.username
+        }
     };
     // Create the new campground and save to the DB
     Campground.create(newCampground, (err, campground) => {
@@ -32,11 +42,6 @@ router.post("/", (req, res) => {
             res.redirect("/campgrounds");
         }
     });
-});
-
-// NEW - Show form to create new campground
-router.get("/new", (req, res) => {
-    res.render("campgrounds/new");
 });
 
 // SHOW - Shows more info about one campground
