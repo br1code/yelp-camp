@@ -14,7 +14,7 @@ router.get("/new", middleware.isLoggedIn, (req, res) => {
         if (err) {
             console.log(`Error: ${err}`);
         } else {
-            res.render("comments/new", {campground: campground});
+            res.render("comments/new", {campground});
         }
     });
 });

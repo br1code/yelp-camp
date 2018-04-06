@@ -11,9 +11,7 @@ router.get("/", (req, res) => {
         if (err) {
             console.log(`Error: ${err}`);
         } else {
-            res.render("campgrounds/index", {
-                campgrounds: campgrounds,
-            });
+            res.render("campgrounds/index", {campgrounds});
         }
     });
 });
@@ -51,12 +49,48 @@ router.get("/:id", (req, res) => {
         exec((err, campground) => {
             if (err) {
                 console.log(`Error: ${err}`);
+                res.render("campgrounds/index");
             } else {
-                res.render("campgrounds/show", {
-                    campground: campground
-                });
+                res.render("campgrounds/show", {campground});
             }
         });
+});
+
+// EDIT - Show form to edit campground
+router.get("/:id/edit", (req, res) => {
+    Campground.findById(req.params.id, (err, campground) => {
+        if (err) {
+            console.log(`Error: ${err}`);
+            res.redirect("/campgrounds");
+        } else {
+            res.render("campgrounds/edit", {campground});
+        }
+    })
+});
+
+// UPDATE - Update a campground
+router.put("/:id", (req, res) => {
+    Campground.findByIdAndUpdate(req.params.id, req.body.campground, 
+        (err, campground) => {
+            if (err) {
+                console.log(`Error: ${err}`);
+                res.redirect("/campgrounds");
+            } else {
+                res.redirect("/campgrounds/" + req.params.id);
+            }
+    });
+});
+
+// DESTROY - Delete a campground
+router.delete("/:id", (req, res) => {
+    Campground.findByIdAndRemove(req.params.id, err => {
+        if (err) {
+            console.log(`Error: ${err}`);
+            res.redirect("/campgrounds");
+        } else {
+            res.redirect("/campgrounds");
+        }
+    });
 });
 
 module.exports = router;

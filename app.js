@@ -3,6 +3,7 @@ const express               = require("express"),
     mongoose                = require("mongoose"),
     seedDB                  = require("./seeds"),
     passport                = require("passport"),
+    methodOverride          = require("method-override"),
     LocalStrategy           = require("passport-local"),
     passportLocalMongoose   = require("passport-local-mongoose"),
     expressSession          = require("express-session"),
@@ -26,10 +27,10 @@ mongoose.connect("mongodb://localhost/yelp_camp");
 app.set("view engine", "ejs");
 app.use(express.static(__dirname + "/public"));
 app.use(bodyParser.urlencoded({extended: true}));
-
+app.use(methodOverride("_method"));
 
 // Passport configuration
-let sessionConfig = {
+const sessionConfig = {
     secret: "the most encrypted secret in the world",
     resave: false,
     saveUninitialized: false
