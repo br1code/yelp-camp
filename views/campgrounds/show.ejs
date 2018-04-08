@@ -2,21 +2,21 @@
 
     <div class="container">
         <div class="row">
-
+            <!-- Campground Options -->
             <div class="col-md-3">
                 <p class="lead">YelpCamp</p>
                 <div class="list-group">
-                    <li class="list-group-item active">Info 1</li>
-                    <li class="list-group-item">Info 2</li>
-                    <li class="list-group-item">Info 3</li>
+                    <a class="list-group-item active" href="#">Info</a>
+                    <a class="list-group-item" href="#">Contact</a>
+                    <a class="list-group-item" href="#">Location</a>
                 </div>
-            </div>
-
+            </div> <!-- end Campground Options -->
+            <!-- Campground Info -->
             <div class="col-md-9">
                 <div class="thumbnail">
                     <img class="image-responsive" src="<%= campground.image %>" alt="Campground Image">
                     <div class="caption-full">
-                        <h4 class="pull-right">$9.00/night</h4>
+                        <h4 class="pull-right">$<%= campground.price %> / night</h4>
                         <h4><a><%= campground.name %></a></h4>
                         <h5>Submitted by <strong><em><%= campground.author.username %></em></strong></h5>
                         <p><%= campground.description %></p>
@@ -27,7 +27,8 @@
                             </form>
                         <% } %>
                     </div>
-                </div>
+                </div> <!-- end Campground Info -->
+                <!-- Comments Section -->
                 <div class="well">
                     <div class="text-right">
                         <a class="btn btn-sm btn-success" href="/campgrounds/<%= campground._id %>/comments/new">
@@ -39,7 +40,7 @@
                         <p class="text-center">No comments yet</p>
                     <% } else { %>
                         <% campground.comments.forEach(comment => { %>
-                            <div class="row">
+                            <div class="row"> <!-- start comment -->
                                 <div class="col-md-12">
                                     <strong><%= comment.author.username %></strong>
                                     <span class="pull-right">
@@ -57,12 +58,12 @@
                                     <p><%= comment.text %></p>
                                     <hr>
                                 </div>
-                            </div>
+                            </div> <!-- end comment -->
                         <% }) %>
                     <% } %>   
-                </div>
+                </div> <!-- end Comments Section-->
             </div>
-        </div>
-    </div>
+        </div> <!-- end row -->
+    </div> <!-- end container -->
 
 <% include ../partials/footer %>
