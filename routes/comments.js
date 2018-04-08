@@ -48,4 +48,48 @@ router.post("/", middleware.isLoggedIn, (req, res) => {
     });
 });
 
+// EDIT - Show form to edit comment
+router.get("/:comment_id/edit", middleware.checkCommentAuthor, (req, res) => {
+    Comment.findById(req.params.comment_id, (err, comment) => {
+        if (err) {
+            console.log(`Error: ${err}`);
+            res.redirect("back");
+        } else {
+            res.render("comments/edit", {
+                comment,
+                campground_id: req.params.id
+            });
+        }
+    });
+});
+
+// UPDATE - Update a comment
+router.put("/:comment_id", middleware.checkCommentAuthor, (req, res) => {
+    // update time first
+    req.body.comment.date = moment().calendar();
+    Comment.findByIdAndUpdate(req.params.comment_id, req.body.comment, 
+    (err, comment) => {
+        if (err) {
+            console.log(`Error: ${err}`);
+            res.redirect("back");
+        } else {
+            res.redirect("/campgrounds/" + req.params.id);
+        }
+    });
+});
+
+
+// DESTROY - Delete a comment
+router.delete("/:comment_id", middleware.checkCommentAuthor, (req, res) => {
+    Comment.findByIdAndRemove(req.params.comment_id, err => {
+        if (err) {
+            console.log(`Error: ${err}`);
+            res.redirect("back");
+        } else {
+            res.redirect("/campgrounds/" + req.params.id);
+        }
+    });
+});
+
+
 module.exports = router;

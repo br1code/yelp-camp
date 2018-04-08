@@ -57,7 +57,7 @@ router.get("/:id", (req, res) => {
 });
 
 // EDIT - Show form to edit campground
-router.get("/:id/edit", (req, res) => {
+router.get("/:id/edit", middleware.checkCampAuthor, (req, res) => {
     Campground.findById(req.params.id, (err, campground) => {
         if (err) {
             console.log(`Error: ${err}`);
@@ -69,7 +69,7 @@ router.get("/:id/edit", (req, res) => {
 });
 
 // UPDATE - Update a campground
-router.put("/:id", (req, res) => {
+router.put("/:id", middleware.checkCampAuthor, (req, res) => {
     Campground.findByIdAndUpdate(req.params.id, req.body.campground, 
         (err, campground) => {
             if (err) {
@@ -82,7 +82,7 @@ router.put("/:id", (req, res) => {
 });
 
 // DESTROY - Delete a campground
-router.delete("/:id", (req, res) => {
+router.delete("/:id", middleware.checkCampAuthor, (req, res) => {
     Campground.findByIdAndRemove(req.params.id, err => {
         if (err) {
             console.log(`Error: ${err}`);
