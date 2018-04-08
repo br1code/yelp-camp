@@ -16,7 +16,8 @@ let isLoggedIn = (req, res, next) => {
 let checkCampAuthor = (req, res, next) => {
     if (req.isAuthenticated()) {
         Campground.findById(req.params.id, (err, campground) => {
-            if (err) {
+            // if error or campground not found
+            if (err || !campground) {
                 req.flash("error", "Campground not found");
                 res.redirect("back");
             } else {
@@ -30,7 +31,7 @@ let checkCampAuthor = (req, res, next) => {
         });
     } else {
         req.flash("error", "You need to be logged in to do that");
-        res.redirect("back");
+        res.redirect("/login");
     }
 };
 
@@ -38,7 +39,7 @@ let checkCampAuthor = (req, res, next) => {
 let checkCommentAuthor = (req, res, next) => {
     if (req.isAuthenticated()) {
         Comment.findById(req.params.comment_id, (err, comment) => {
-            if (err) {
+            if (err || !comment) {
                 req.flash("error", "Comment not found");
                 res.redirect("back");
             } else {

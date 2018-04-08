@@ -11,7 +11,7 @@ const router = express.Router({mergeParams: true});
 // NEW - Show form to create new comment
 router.get("/new", middleware.isLoggedIn, (req, res) => {
     Campground.findById(req.params.id, (err, campground) => {
-        if (err) {
+        if (err || !campground) {
             console.log(`Error: ${err}`);
             req.flash("error", "Unable to add comment - Campground not found");
             res.redirect("/campgrounds");
@@ -54,37 +54,39 @@ router.post("/", middleware.isLoggedIn, (req, res) => {
     });
 });
 
-// EDIT - Show form to edit comment
-router.get("/:comment_id/edit", middleware.checkCommentAuthor, (req, res) => {
-    Comment.findById(req.params.comment_id, (err, comment) => {
-        if (err) {
-            console.log(`Error: ${err}`);
-            req.flash("error", "Unable to edit comment - Comment not found");
-            res.redirect("back");
-        } else {
-            res.render("comments/edit", {
-                comment,
-                campground_id: req.params.id
-            });
-        }
-    });
+
+router.get("/:comment_id/edit", middleware.checkCampAuthor, 
+    middleware.checkCommentAuthor, (req, res) => {
+        Comment.findById(req.params.comment_id, (err, comment) => {
+            if (err) {
+                console.log(`Error: ${err}`);
+                req.flash("error", "Unable to edit comment - Comment not found");
+                res.redirect("back");
+            } else {
+                res.render("comments/edit", {
+                    comment,
+                    campground_id: req.params.id
+                });
+            }
+        });
 });
 
 // UPDATE - Update a comment
-router.put("/:comment_id", middleware.checkCommentAuthor, (req, res) => {
-    // update time first
-    req.body.comment.date = moment().calendar();
-    Comment.findByIdAndUpdate(req.params.comment_id, req.body.comment, 
-    (err, comment) => {
-        if (err) {
-            console.log(`Error: ${err}`);
-            req.flash("error", "Unable to edit comment - Comment not found");
-            res.redirect("back");
-        } else {
-            req.flash("success", "Comment updated successfully");
-            res.redirect("/campgrounds/" + req.params.id);
-        }
-    });
+router.put("/:comment_id", middleware.checkCampAuthor, 
+    middleware.checkCommentAuthor, (req, res) => {
+        // update time first
+        req.body.comment.date = moment().calendar();
+        Comment.findByIdAndUpdate(req.params.comment_id, req.body.comment, 
+        (err, comment) => {
+            if (err || !comment) {
+                console.log(`Error: ${err}`);
+                req.flash("error", "Unable to edit comment - Comment not found");
+                res.redirect("back");
+            } else {
+                req.flash("success", "Comment updated successfully");
+                res.redirect("/campgrounds/" + req.params.id);
+            }
+        });
 });
 
 

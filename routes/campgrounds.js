@@ -52,10 +52,11 @@ router.get("/:id", (req, res) => {
     Campground.findById(req.params.id).
         populate("comments").
         exec((err, campground) => {
-            if (err) {
+            // if error or not campground found
+            if (err || !campground) {
                 console.log(`Error: ${err}`);
                 req.flash("error", "Unable to show the campground - Campground not found");
-                res.render("campgrounds/index");
+                res.redirect("back");
             } else {
                 res.render("campgrounds/show", {campground});
             }
@@ -79,7 +80,7 @@ router.get("/:id/edit", middleware.checkCampAuthor, (req, res) => {
 router.put("/:id", middleware.checkCampAuthor, (req, res) => {
     Campground.findByIdAndUpdate(req.params.id, req.body.campground, 
         (err, campground) => {
-            if (err) {
+            if (err || !campground) {
                 console.log(`Error: ${err}`);
                 req.flash("error", "Unable to edit the campground");
                 res.redirect("/campgrounds");

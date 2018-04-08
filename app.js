@@ -55,6 +55,12 @@ app.use("/", indexRoutes);
 app.use("/campgrounds/:id/comments", commentRoutes);
 app.use("/campgrounds", campgroundRoutes);
 
+// Handling missed/wrong page
+app.get('*',function (req, res) {
+    req.flash("error","Page not found");
+    res.redirect('/');
+});
+
 // Fill the DB with initial data
 // seedDB();
 
